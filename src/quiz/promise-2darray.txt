@@ -2,3 +2,32 @@
 - Is there a difference in the flow of execution from when the code was in the setTimeout function?
 - Is the flow of execution in both these examples different from the flow of execution with the examples using the fetch() API, which also returns a promise? 
 - If yes, explain the code execution difference. Add your explanation to this file.
+
+Comparing Execution Flow with and without setTimeout()
+With setTimeout()
+The summation logic runs inside setTimeout(), which schedules it to execute in the timer phase of the event loop. This means:
+The function sum2DArray() returns immediately with a pending promise.
+The console.log('returning from sum') statement executes before the summation happens.
+The summation happens asynchronously in the next event loop cycle.
+The resolved value is only available later.
+
+Without setTimeout()
+If we remove setTimeout(), the summation executes immediately within the same function execution context. This changes the flow:
+The function sum2DArray() starts and processes the summation immediately.
+The console.log('returning from sum') executes after summation is completed.
+The resolved promise is fulfilled synchronously (though it still behaves asynchronously due to the promise wrapper).
+The flow is more similar to synchronous execution.
+
+Comparison with fetch() API
+The fetch() API in Node.js also returns a promise but interacts differently with the event loop:
+fetch() schedules an HTTP request and places the response handling in the poll phase of the event loop.
+Unlike setTimeout(), which places execution in the timer phase, fetch() will only resolve once I/O operations (e.g., network requests) complete.
+This means:
+fetch() is inherently asynchronous due to its network dependency.
+Our sum2DArray() function was artificially made asynchronous with setTimeout(), but removing it makes it behave more like a normal synchronous function wrapped in a promise.
+
+Conclusion
+Using setTimeout() delays execution until the next event loop cycle, making it non-blocking.
+Removing setTimeout() makes summation immediate, changing execution order.
+Unlike fetch(), which is truly asynchronous due to network delay, sum2DArray() with setTimeout() was artificially asynchronous.
+This experiment illustrates how JavaScript’s event loop prioritizes tasks and helps differentiate between inherent async operations (I/O) and manually scheduled async tasks (setTimeout).
