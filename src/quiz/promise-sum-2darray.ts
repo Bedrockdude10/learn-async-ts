@@ -1,23 +1,15 @@
-function sum2DArrayConcurrent(arr: number[][]): Promise<number> {
-    return new Promise((resolve, reject) => {
-        if (arr.length === 0) {
-            reject('Cannot sum an empty array');
-            return;
-        }
+async function sum2DArrayConcurrent(arr: number[][]): Promise<number> {
+    if (arr.length === 0) {
+        throw new Error('Cannot sum an empty array');
+    }
 
-        // Create a promise for each row summation
-        const rowSumPromises = arr.map(row => 
-            new Promise<number>((resolve) => {
-                const rowSum = row.reduce((acc, num) => acc + num, 0);
-                resolve(rowSum);
-            })
-        );
+    // Compute row sums concurrently
+    const rowSums = await Promise.all(
+        arr.map(async row => row.reduce((acc, num) => acc + num, 0))
+    );
 
-        // Execute all row sum calculations concurrently
-        Promise.all(rowSumPromises)
-            .then(rowSums => resolve(rowSums.reduce((acc, sum) => acc + sum, 0)))
-            .catch(reject);
-    });
+    // Compute the total sum
+    return rowSums.reduce((acc, sum) => acc + sum, 0);
 }
 
 // Example usage
@@ -27,10 +19,18 @@ const array2D_1 = [
     [7, 8, 9]
 ];
 
-sum2DArrayConcurrent(array2D_1)
-    .then(result => console.log('Concurrent Sum:', result))
-    .catch(error => console.error('Error:', error));
+(async () => {
+    try {
+        const result1 = await sum2DArrayConcurrent(array2D_1);
+        console.log('Concurrent Sum:', result1);
+    } catch (error) {
+        console.error('Error:', error);
+    }
 
-sum2DArrayConcurrent([])
-    .then(result => console.log('Concurrent Sum:', result))
-    .catch(error => console.error('Error:', error));
+    try {
+        const result2 = await sum2DArrayConcurrent([]);
+        console.log('Concurrent Sum:', result2);
+    } catch (error) {
+        console.error('Error:', error);
+    }
+})();
